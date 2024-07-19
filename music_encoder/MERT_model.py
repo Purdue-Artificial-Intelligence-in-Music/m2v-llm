@@ -4,6 +4,8 @@ from transformers import AutoModel
 import torch
 from torch import nn
 from adapter_model import *
+from LoRA_funcs import *
+import peft
 
 
 class MERT_model(torch.nn.Module):
@@ -46,6 +48,16 @@ class MERT_model(torch.nn.Module):
         # self.processor = self.processor.to(device)
         self.adapter = self.adapter.to(device)
         return self
+    
+    def get_LoRA_model(self):
+        trainable_modules, adapter_modules = get_LoRA_trainable_modules(self, separate_out_adapters=True)
+        config = LoraConfig(
+            target_modules=trainable_modules,
+            modules_to_save=adapter_modules,
+            bias='lora_only',
+            use_rslora=True,
+        )
+        return peft.get_peft_model(self, config)
     
     def forward_single_batch(self, input_audio, sampling_rate: int):
         # Resample audio

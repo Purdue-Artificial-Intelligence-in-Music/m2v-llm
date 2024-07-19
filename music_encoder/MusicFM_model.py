@@ -3,6 +3,8 @@ import torch
 from musicfm.model.musicfm_25hz import MusicFM25Hz
 import subprocess
 from adapter_model import *
+from LoRA_funcs import *
+import peft
 
 class MusicFM_model(torch.nn.Module):
     '''
@@ -24,11 +26,9 @@ class MusicFM_model(torch.nn.Module):
         self.hidden_size = hidden_size
         self.MUSICFM_PATH = musicfm_path
         if self.MUSICFM_PATH == "":
-            self.MUSICFM_PATH = os.path.abspath(__file__).split("MusicFM_model.py")[0]
+            self.MUSICFM_PATH = os.path.join(os.path.abspath(__file__).split("MusicFM_model.py")[0], "musicfm")
         self.device = device
         self.temporal_resolution = temporal_resolution
-
-        print(self.MUSICFM_PATH)
 
         # Download model weights and parameters
         self.model_str = model_str
@@ -63,6 +63,16 @@ class MusicFM_model(torch.nn.Module):
         self.musicfm = self.musicfm.to(device)
         self.adapter = self.adapter.to(device)
         return self
+    
+    def get_LoRA_model(self):
+        trainable_modules, adapter_modules = get_LoRA_trainable_modules(self, separate_out_adapters=True)
+        config = LoraConfig(
+            target_modules=trainable_modules,
+            modules_to_save=adapter_modules,
+            bias='lora_only',
+            use_rslora=True,
+        )
+        return peft.get_peft_model(self, config)
     
     def forward(self, input_audio, sampling_rate: int):
         if not input_audio.device == self.device:
