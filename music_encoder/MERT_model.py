@@ -21,7 +21,7 @@ class MERT_model(torch.nn.Module):
     - resample: whether to resample the input audio to the model's sample rate
     - device: the device to run the model on
 
-    https://huggingface.co/m-a-p/MERT-v0
+    https://huggingface.co/m-a-p/MERT-v1-95M
 
     '''
     def __init__(self, hidden_size=128, temporal_resolution: int = 75, resample: bool = True, device: str = "cuda:0"):
