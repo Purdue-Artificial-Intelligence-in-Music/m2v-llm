@@ -22,39 +22,38 @@ class MusicFM_model(torch.nn.Module):
     def __init__(self, hidden_size=128, model_str: str="MSD", temporal_resolution: int = 25, musicfm_path: str = "", device: str = "cuda:0"):
         super(MusicFM_model, self).__init__()
         self.hidden_size = hidden_size
-        self.HOME_PATH = musicfm_path
-        if self.HOME_PATH == "":
-            self.HOME_PATH = os.path.abspath(__file__).split("MusicFM_model.py")[0]
+        self.MUSICFM_PATH = musicfm_path
+        if self.MUSICFM_PATH == "":
+            self.MUSICFM_PATH = os.path.abspath(__file__).split("MusicFM_model.py")[0]
         self.device = device
         self.temporal_resolution = temporal_resolution
 
-        print(self.HOME_PATH)
+        print(self.MUSICFM_PATH)
 
         # Download model weights and parameters
         self.model_str = model_str
         if not model_str == "MSD" and not model_str == "FMA":
             raise ValueError("model_str must be 'MSD' or 'FMA'")
         if model_str == "MSD":
-            if not os.path.exists(self.HOME_PATH.join("musicfm/data/msd_stats.json")):
-                subprocess.run(["wget", "-P", self.HOME_PATH.join("musicfm/data/"), "https://huggingface.co/minzwon/MusicFM/resolve/main/msd_stats.json"])
-            if not os.path.exists(self.HOME_PATH.join("musicfm/data/pretrained_msd.pt")):
-                subprocess.run(["wget", "-P", self.HOME_PATH.join("musicfm/data/"), "https://huggingface.co/minzwon/MusicFM/resolve/main/pretrained_msd.pt"])
+            if not os.path.isfile(os.path.join(self.MUSICFM_PATH, "data/msd_stats.json")):
+                subprocess.run(["wget", "-P", os.path.join(self.MUSICFM_PATH, "data"), "https://huggingface.co/minzwon/MusicFM/resolve/main/msd_stats.json"])
+            if not os.path.isfile(os.path.join(self.MUSICFM_PATH, "data/pretrained_msd.pt")):
+                subprocess.run(["wget", "-P", os.path.join(self.MUSICFM_PATH, "data"), "https://huggingface.co/minzwon/MusicFM/resolve/main/pretrained_msd.pt"])
             self.musicfm = MusicFM25Hz(
                 is_flash=False,
-                stat_path=os.path.join(self.HOME_PATH, "data", "msd_stats.json"),
-                model_path=os.path.join(self.HOME_PATH, "data", "pretrained_msd.pt"),
+                stat_path=os.path.join(self.MUSICFM_PATH, "data", "msd_stats.json"),
+                model_path=os.path.join(self.MUSICFM_PATH, "data", "pretrained_msd.pt"),
             )
         elif model_str == "FMA":
-            if not os.path.exists(self.HOME_PATH.join("musicfm/data/fma_stats.json")):
-                subprocess.run(["wget", "-P", self.HOME_PATH.join("musicfm/data/"), "https://huggingface.co/minzwon/MusicFM/resolve/main/fma_stats.json"])
-            if not os.path.exists(self.HOME_PATH.join("musicfm/data/pretrained_fma.pt")):
-                subprocess.run(["wget", "-P", self.HOME_PATH.join("musicfm/data/"), "https://huggingface.co/minzwon/MusicFM/resolve/main/pretrained_fma.pt"])
+            if not os.path.isfile(os.path.join(self.MUSICFM_PATH, "data/fma_stats.json")):
+                subprocess.run(["wget", "-P", os.path.join(self.MUSICFM_PATH, "data"), "https://huggingface.co/minzwon/MusicFM/resolve/main/fma_stats.json"])
+            if not os.path.isfile(os.path.join(self.MUSICFM_PATH, "data/pretrained_fma.pt")):
+                subprocess.run(["wget", "-P", os.path.join(self.MUSICFM_PATH, "data"), "https://huggingface.co/minzwon/MusicFM/resolve/main/pretrained_fma.pt"])
             self.musicfm = MusicFM25Hz(
                 is_flash=False,
-                stat_path=os.path.join(self.HOME_PATH, "data", "fma_stats.json"),
-                model_path=os.path.join(self.HOME_PATH, "data", "pretrained_fma.pt"),
+                stat_path=os.path.join(self.MUSICFM_PATH, "data", "fma_stats.json"),
+                model_path=os.path.join(self.MUSICFM_PATH, "data", "pretrained_fma.pt"),
             )
-
         self.adapter = Adapter_Model(25, self.temporal_resolution, 1024, self.hidden_size)
 
         self.to(device)
