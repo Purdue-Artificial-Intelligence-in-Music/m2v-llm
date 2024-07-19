@@ -38,7 +38,6 @@ class Adapter_Model(torch.nn.Module):
         return self
     
     def forward(self, input_tensor):
-        print("Input shape", input_tensor.shape)
         n_frame = int(input_tensor.shape[-2] * float(self.output_sample_hz)/ self.input_sample_hz)
         input_tensor = input_tensor.swapaxes(-1, -2)
         input_tensor = torch.nn.AdaptiveAvgPool1d(n_frame)(input_tensor)
