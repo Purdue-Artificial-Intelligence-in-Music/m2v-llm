@@ -50,6 +50,9 @@ class MERT_model(torch.nn.Module):
         return self
     
     def get_LoRA_model(self):
+        '''
+        Returns the LoRA-trainable version of the model.
+        '''
         trainable_modules, adapter_modules = get_LoRA_trainable_modules(self, separate_out_adapters=True)
         config = LoraConfig(
             target_modules=trainable_modules,
