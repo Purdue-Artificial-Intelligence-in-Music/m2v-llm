@@ -1,0 +1,1 @@
+This folder is the temporary storage location for the generated images
