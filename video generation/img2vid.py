@@ -2,6 +2,7 @@ HEIGHT = 512
 WIDTH = 512
 FPS = 10
 NUM_FRAMES = 10
+REPO_ID = "ali-vilab/i2vgen-xl" 
 
 from diffusers.utils import make_image_grid, load_image
 import cv2
@@ -13,11 +14,16 @@ import numpy as np
 from diffusers import I2VGenXLPipeline
 class img2vid:
   
-  def __init__(self, height = HEIGHT,width = WIDTH, fps = FPS, num_frames = NUM_FRAMES):
+  def __init__(self, height = HEIGHT,width = WIDTH, fps = FPS, num_frames = NUM_FRAMES,repo_id = REPO_ID):
     self.height = height
     self.width = width
     self.fps = fps
-    self.num_frame = num_frames
+    self.num_frames = num_frames
+    self.pipe = I2VGenXLPipeline.from_pretrained(repo_id , torch_dtype=torch.float16, variant="fp16").to("cuda")
+    self.image = []
+    self.prompt = ""
+
+
   # def rife(img0,img1,n,model):
   #   img0, img1,h,w = process(img0,img1)
   #   img_list = [img0, img1]
@@ -94,22 +100,26 @@ class img2vid:
   #   img2 = img1
   #   img_list = rife(img1,img2,2,model)
 
-  def initialize_i2vgen():
-    '''
-    This function intializes pipeline for i2vgen
+  # def initialize_i2vgen(self):
+  #   '''
+  #   This function intializes pipeline for i2vgen
     
-    Input: 
-    Output: Pipeline of I2VGen
+  #   Input: 
+  #   Output: Pipeline of I2VGen
     
-    Parameters:
+  #   Parameters:
 
-    '''
+  #   '''
         
-    repo_id = "ali-vilab/i2vgen-xl" 
-    pipeline = I2VGenXLPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, variant="fp16").to("cuda")
-    return pipeline
+  #   repo_id = "ali-vilab/i2vgen-xl" 
+  #   pipeline = I2VGenXLPipeline.from_pretrained("ali-vilab/i2vgen-xl" , torch_dtype=torch.float16, variant="fp16").to("cuda")
+  #   return pipeline
 
-  def generate_vid(pipe,image,prompt,height,width,fps,num_frames):
+  
+  def set_prompt(self, prompt):
+    self.prompt = prompt
+
+  def generate_vid(self,image):
     '''
     This function intializes pipeline for i2vgen
     
@@ -125,22 +135,14 @@ class img2vid:
     - num_frames: number of frames being generated
     '''
     generator = torch.manual_seed(8888)
-    frames = pipe(
-        prompt=prompt,
+    frames = self.pipe(
+        prompt=self.prompt,
         image=image,
-        height=height,
-        width=width,
+        height=self.height,
+        width=self.width,
         generator=generator,
-        target_fps = fps,
-        num_frames = num_frames
+        target_fps = self.fps,
+        num_frames = self.num_frames
     ).frames[0]
     return frames
 
-  def main():
-  #   model = intialize_rife()
-  #   warmup(model)
-    pipe = initialize_i2vgen()
-    image_url = "https://raw.githubusercontent.com/ali-vilab/VGen/main/data/test_images/img_0009.png"
-    image = load_image(image_url).convert("RGB")
-    prompt = "Papers were floating in the air on a table in the library"
-    result = generate_vid(pipe,image,prompt,HEIGHT,WIDTH,FPS,NUM_FRAMES)
