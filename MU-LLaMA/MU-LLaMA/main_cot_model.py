@@ -2,14 +2,15 @@ import argparse
 
 import torch.cuda
 import torchaudio
-import av
+import cv2
+from PIL import Image
+import numpy as np
 
 from diffusers import StableDiffusionPipeline
-import transformers
-from transformers import LlamaForCausalLM, LlamaTokenizer
 
 import llama
 from util.misc import *
+import os
 
 FPS = 30
 SR = 24000
@@ -34,20 +35,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# Models
-mullama_model = llama.load("./ckpts/checkpoint.pth", "./ckpts/LLaMA", mert_path="m-a-p/MERT-v1-330M", knn=True, knn_dir="./ckpts", llama_type="7B")
-llama_model = LlamaForCausalLM.from_pretrained("./ckpts/LLaMA/model.model")
-llama_tokenizer = LlamaTokenizer.from_pretrained("./ckpts/LLaMA/tokenizer.model")
-llama_pipe = transformers.pipeline(
-    "text-generation",
-    model=llama_model,
-    tokenizer=llama_tokenizer,
-    torch_dtype=torch.float16,
-    device_map="cuda",
-)
-sd_model_id = "CompVis/stable-diffusion-v1-4"
-pipe = StableDiffusionPipeline.from_pretrained(sd_model_id)
-pipe = pipe.to("cuda")
+# llama_model = LlamaForCausalLM.from_pretrained("./MU-LLaMA/MU-LLaMA/ckpts/LLaMA_HF")
+# llama_tokenizer = LlamaTokenizer.from_pretrained("./MU-LLaMA/MU-LLaMA/ckpts/LLaMA_HF")
+# llama_pipe = transformers.pipeline(
+#     "text-generation",
+#     model=llama_model,
+#     tokenizer=llama_tokenizer,
+#     torch_dtype=torch.float16,
+#     device_map="cuda",
+# )
+
 
 def interp_pipe(image1, image2, length, output_frame_rate = FPS):
     output_frames = []
@@ -55,17 +52,15 @@ def interp_pipe(image1, image2, length, output_frame_rate = FPS):
         output_frames.append(image1)
     return output_frames
 
-def summarize_convo(history_list):
-    total_prompt = "Please summarize the  following conversation:"
+def summarize_convo(history_list, mullama_model):
+    total_prompt = "Please summarize the following conversation:"
     for history in history_list:
         total_prompt += "We asked:" + history[0]
         if history[1] is not None:
             total_prompt += "You replied: " + history[1] + " "
     
-    out = llama_pipe(total_prompt, max_length=400, do_sample=True, top_k=10, num_return_sequences=1, eos_token_id=LlamaTokenizer.eos_token_id)
-    out_text = ""
-    for seq in out:
-        out_text += seq["generated_text"] + "\n"
+    out = mullama_model.generate_no_audio([total_prompt])
+    return out[0].strip()
 
 def multimodal_generate(
         audio_path,
@@ -76,11 +71,10 @@ def multimodal_generate(
         cache_t,
         cache_weight,
         max_gen_len,
-        gen_t, top_p, output_type,
-        ending = "Please answer our last question.",
+        gen_t, top_p,
         output_video = True
 ):
-    inputs = {}
+    
 
     # Load audio
     if audio_path is None:
@@ -89,9 +83,15 @@ def multimodal_generate(
         raise Exception('Please set the weight')
     audio, sr = torchaudio.load(audio_path)
     if sr != SR:
-        waveform = torchaudio.functional.resample(waveform, orig_freq=sr, new_freq=SR)
-    waveform = torch.mean(waveform, 0)
-    AUDIO_LEN = len(audio)
+        waveform = torchaudio.functional.resample(audio, orig_freq=sr, new_freq=SR)
+    else:
+        waveform = audio
+    waveform = torch.mean(waveform, np.argmin([len(waveform), len(waveform[0])])) if len(waveform.shape) > 1 else waveform
+    print(f"Waveform shape: {waveform.shape}")
+    AUDIO_LEN = len(waveform)
+
+    mullama_model = llama.load("./ckpts/checkpoint.pth", "./ckpts/LLaMA", mert_path="m-a-p/MERT-v1-330M", knn=True, knn_dir="./ckpts", llama_type="7B")
+    mullama_model.eval()
 
     output_images = []
 
@@ -101,7 +101,7 @@ def multimodal_generate(
     break_at_end = False
 
     long_history_list = []
-    absolute_history_list = []
+    video_prompts = []
     while not break_at_end:
         # Calculate sample ranges
         end_sample = curr_sample + args.samples_used_per_iter
@@ -109,55 +109,97 @@ def multimodal_generate(
             end_sample = AUDIO_LEN
             break_at_end = True
 
-        inputs['Audio'] = [audio[curr_sample : end_sample], audio_weight]  # Audio is [samples, weight]
+        print(f"Processing chunk {i} from sample {curr_sample} to {end_sample}")
+        inputs = {}
+        inputs['Audio'] = [audio[curr_sample : end_sample].reshape(1, -1), audio_weight]  # Audio is [samples, weight]
 
         history_list = []
 
         long_term_prompt = "This is the first chunk of music.\n" if len(long_history_list) == 0 \
-                            else "Here is what we said about the previous chunks of music:\n" + summarize_convo(long_history_list)
+                            else "Here is what we said about the previous chunks of music:\n" + summarize_convo(long_history_list, mullama_model)
         
         with torch.cuda.amp.autocast():
-            audio_query = self.forward_audio(inputs, cache_size, cache_t, cache_weight)
+            audio_query = mullama_model.forward_audio(inputs, cache_size, cache_t, cache_weight)
 
         for prompt in prompt_list:
 
             total_prompt = preamble + "\n" + long_term_prompt
             if len(history_list) == 0:
                 total_prompt += "Nothing has been said yet about the current chunk of music.\n"
-            total_prompt += summarize_convo(history_list)
+            total_prompt += summarize_convo(history_list, mullama_model)
             total_prompt += "Now, please answer the following question: " + prompt
 
-            prompts = [llama.format_prompt(total_prompt)]
+            print("-------- Total prompt:")
+            print(total_prompt)
+
+            prompts = [total_prompt]
 
             prompts = [mullama_model.tokenizer.encode(x, bos=True, eos=False) for x in prompts]
             with torch.cuda.amp.autocast():
-                results = mullama_model.generate_with_audio_query(audio_query, inputs, prompts, max_gen_len=max_gen_len, temperature=gen_t, top_p=top_p,
-                                        cache_size=cache_size, cache_t=cache_t, cache_weight=cache_weight)
+                results = mullama_model.generate_with_audio_query(audio_query, prompts, max_gen_len=max_gen_len, temperature=gen_t, top_p=top_p)
 
-            history_list.append(prompt, results[0].strip())
+            history_list.append([prompt, results[0].strip()])
 
-        long_history_list.append([f"About the number %d chunk of music, we said: " % (i), summarize_convo(history_list)])
+        long_history_list.append([f"About the number %d chunk of music, we said: " % (i), summarize_convo(history_list, mullama_model)])
         
-        output_images.append(pipe(history_list[-1][1], num_inference_steps=args.inference_steps, guidance_scale=args.guidance_scale).images[0])
+        video_prompts.append(history_list[-1][1])
+
+        print(f"The prompt we came up with is: {video_prompts[-1]}")
+
+        curr_sample += args.samples_jump_per_iter
+
+        i += 1
+
+        if i > 3:
+            break
+
+
+    del mullama_model
+
+    with open("output_video_prompts.txt", 'w') as f:
+        for prompt in video_prompts:
+            f.write(prompt)
+            f.write("\n")
+
+    sd_model_id = "CompVis/stable-diffusion-v1-4"
+    pipe = StableDiffusionPipeline.from_pretrained(sd_model_id)
+    pipe = pipe.to("cuda")
+
+    for prompt in video_prompts:
+        output_images.append(pipe(prompt, num_inference_steps=args.inference_steps, guidance_scale=args.guidance_scale).images[0])
 
     output_video_frames = []
     for i in range(len(output_images) - 1):
         output_video_frames.extend(interp_pipe(output_images[i], output_images[i + 1], float(args.samples_jump_per_iter) / SR))
 
     if output_video:
-        container = av.open("test.mp4", mode="w")
-        stream = container.add_stream("mpeg4", rate=FPS)
-        stream.width = 480
-        stream.height = 320
-        stream.pix_fmt = "rgb24"
-
+        videodims = output_video_frames[0].size
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")    
+        video = cv2.VideoWriter("test.mp4", fourcc, FPS, videodims)
         for frame in output_video_frames:
-            frame = frame.permute(1, 2, 0).cpu().numpy()
-            frame = (frame * 255).astype("uint8")
-            frame = av.VideoFrame.from_ndarray(frame, format="rgb24")
-            for packet in stream.encode(frame):
-                container.mux(packet)
+            imtemp = frame.copy()
+            video.write(cv2.cvtColor(np.array(imtemp), cv2.COLOR_RGB2BGR))
+        video.release()
 
-        container.close()
+    return output_images, long_history_list
 
-    return output_images
+if __name__ == "__main__":
+    preamble = ""
+    prompt_list = []
+    with open('preamble.txt', 'r') as f:
+        preamble = f.read()
+        print(f"Preamble:\n{preamble}")
+    with open('prompt_list.txt', 'r') as f:
+        prompt_list = f.readlines()
+        print(f"Prompt list:\n{prompt_list}")
+    _, long_history_list = multimodal_generate(args.audio_path, 1.0, preamble, prompt_list, 10, 20, 0.1, 1024, 0.25, 1.0)
+    with open("output_descriptions.txt", 'w') as f:
+        for x in long_history_list:
+            assert type(x[0]) == str and type(x[1]) == str
+            f.write("-------------------\nOur question:\n")
+            f.write(x[0])
+            f.write("\nMU-LLaMA's answer:\n")
+            f.write(x[1])
+            f.write("\n\n")
+
+            
