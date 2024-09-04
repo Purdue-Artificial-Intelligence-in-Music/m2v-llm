@@ -12,6 +12,8 @@ import llama
 from util.misc import *
 import os
 
+from history_list import HistoryList
+
 FPS = 30
 SR = 24000
 
@@ -22,10 +24,10 @@ parser.add_argument(
     help="Path to audio you want to render a video for",
 )
 parser.add_argument(
-    "--samples_used_per_iter", default=50000, type=int, help="Number of samples of audio per generated video keyframe",
+    "--seconds_used_per_iter", default=5, type=float, help="Number of seconds of audio per generated video keyframe",
 )
 parser.add_argument(
-    "--samples_jump_per_iter", default=5000, type=int, help="Number of samples of audio per generated video keyframe",
+    "--seconds_jump_per_iter", default=0.5, type=float, help="Number of seconds of audio per generated video keyframe",
 )
 parser.add_argument(
     "--inference_steps", default=50, type=int, help="Number of steps for Stable Diffusion",
@@ -72,9 +74,9 @@ def multimodal_generate(
         cache_weight,
         max_gen_len,
         gen_t, top_p,
+        h_list=HistoryList(),
         output_video = True
 ):
-    
 
     # Load audio
     if audio_path is None:
@@ -84,11 +86,16 @@ def multimodal_generate(
     audio, sr = torchaudio.load(audio_path)
     if sr != SR:
         waveform = torchaudio.functional.resample(audio, orig_freq=sr, new_freq=SR)
+        sr = SR
     else:
         waveform = audio
     waveform = torch.mean(waveform, np.argmin([len(waveform), len(waveform[0])])) if len(waveform.shape) > 1 else waveform
     print(f"Waveform shape: {waveform.shape}")
     AUDIO_LEN = len(waveform)
+    audio = waveform
+
+    SAMPLES_JUMP = int(max(args.seconds_jump_per_iter * sr, 1))
+    SAMPLES_USED = int(max(args.seconds_used_per_iter * sr, 1))
 
     mullama_model = llama.load("./ckpts/checkpoint.pth", "./ckpts/LLaMA", mert_path="m-a-p/MERT-v1-330M", knn=True, knn_dir="./ckpts", llama_type="7B")
     mullama_model.eval()
@@ -100,23 +107,23 @@ def multimodal_generate(
     i = 1
     break_at_end = False
 
-    long_history_list = []
     video_prompts = []
     while not break_at_end:
         # Calculate sample ranges
-        end_sample = curr_sample + args.samples_used_per_iter
+        end_sample = curr_sample + SAMPLES_USED
         if end_sample > AUDIO_LEN:
             end_sample = AUDIO_LEN
             break_at_end = True
 
-        print(f"Processing chunk {i} from sample {curr_sample} to {end_sample}")
+        print(f"-----------------\nProcessing chunk {i} from sample {curr_sample} to {end_sample}")
         inputs = {}
+        # print(f"Audio shape: {audio[curr_sample : end_sample].shape}")
         inputs['Audio'] = [audio[curr_sample : end_sample].reshape(1, -1), audio_weight]  # Audio is [samples, weight]
 
         history_list = []
 
-        long_term_prompt = "This is the first chunk of music.\n" if len(long_history_list) == 0 \
-                            else "Here is what we said about the previous chunks of music:\n" + summarize_convo(long_history_list, mullama_model)
+        long_term_prompt = "This is the first chunk of music.\n" if len(h_list.get_list()) == 0 \
+                            else "Here is what we said about the previous chunks of music:\n" + summarize_convo(h_list.get_list(), mullama_model)
         
         with torch.cuda.amp.autocast():
             audio_query = mullama_model.forward_audio(inputs, cache_size, cache_t, cache_weight)
@@ -126,7 +133,8 @@ def multimodal_generate(
             total_prompt = preamble + "\n" + long_term_prompt
             if len(history_list) == 0:
                 total_prompt += "Nothing has been said yet about the current chunk of music.\n"
-            total_prompt += summarize_convo(history_list, mullama_model)
+            else:
+                total_prompt += summarize_convo(history_list, mullama_model)
             total_prompt += "Now, please answer the following question: " + prompt
 
             print("-------- Total prompt:")
@@ -140,13 +148,13 @@ def multimodal_generate(
 
             history_list.append([prompt, results[0].strip()])
 
-        long_history_list.append([f"About the number %d chunk of music, we said: " % (i), summarize_convo(history_list, mullama_model)])
+        h_list.append(f"About the number %d chunk of music, we said: " % (i), summarize_convo(history_list, mullama_model))
         
         video_prompts.append(history_list[-1][1])
 
-        print(f"The prompt we came up with is: {video_prompts[-1]}")
+        #print(f"The prompt we came up with is: {video_prompts[-1]}")
 
-        curr_sample += args.samples_jump_per_iter
+        curr_sample += SAMPLES_JUMP
 
         i += 1
 
@@ -170,7 +178,7 @@ def multimodal_generate(
 
     output_video_frames = []
     for i in range(len(output_images) - 1):
-        output_video_frames.extend(interp_pipe(output_images[i], output_images[i + 1], float(args.samples_jump_per_iter) / SR))
+        output_video_frames.extend(interp_pipe(output_images[i], output_images[i + 1], args.seconds_jump_per_iter))
 
     if output_video:
         videodims = output_video_frames[0].size
@@ -181,25 +189,20 @@ def multimodal_generate(
             video.write(cv2.cvtColor(np.array(imtemp), cv2.COLOR_RGB2BGR))
         video.release()
 
-    return output_images, long_history_list
+    return output_images
 
 if __name__ == "__main__":
     preamble = ""
     prompt_list = []
     with open('preamble.txt', 'r') as f:
         preamble = f.read()
-        print(f"Preamble:\n{preamble}")
+        #print(f"Preamble:\n{preamble}")
     with open('prompt_list.txt', 'r') as f:
         prompt_list = f.readlines()
-        print(f"Prompt list:\n{prompt_list}")
-    _, long_history_list = multimodal_generate(args.audio_path, 1.0, preamble, prompt_list, 10, 20, 0.1, 1024, 0.25, 1.0)
-    with open("output_descriptions.txt", 'w') as f:
-        for x in long_history_list:
-            assert type(x[0]) == str and type(x[1]) == str
-            f.write("-------------------\nOur question:\n")
-            f.write(x[0])
-            f.write("\nMU-LLaMA's answer:\n")
-            f.write(x[1])
-            f.write("\n\n")
-
-            
+        #print(f"Prompt list:\n{prompt_list}")
+    h_list = HistoryList()
+    try:
+        _ = multimodal_generate(args.audio_path, 1.0, preamble, prompt_list, 10, 20, 0.1, 1024, 0.25, 1.0)
+    except Exception as e:
+        print(f"Error: {e}")
+    h_list.write()
