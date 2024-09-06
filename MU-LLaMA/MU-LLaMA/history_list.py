@@ -4,7 +4,7 @@ class HistoryList:
         self.history_index = 0
     
     def append(self, prompt, result):
-        self.history.append((prompt, result))
+        self.history.append([prompt, result])
         self.history_index += 1
 
     def undo(self):
