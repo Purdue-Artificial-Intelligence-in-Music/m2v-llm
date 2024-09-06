@@ -82,6 +82,9 @@ def extract_info(response):
     
 
 def get_captions():
+    '''
+    This captions list is from the MuLLaMA.
+    '''
     return [
         "This music sounds like a mysterious and atmospheric soundscape. It features a haunting melody played on a string instrument, accompanied by subtle, ambient sounds. The tempo is slow and deliberate, creating a sense of suspense and intrigue. The overall mood is dark and evocative, with a hint of melancholy.",
         "This music is a beautiful and ethereal soundscape. It features a haunting melody played on a string instrument, accompanied by gentle, ambient sounds. The tempo is slow and meditative, creating a sense of peace and tranquility. The overall mood is serene and dreamy, with a hint of sadness.",
@@ -89,8 +92,8 @@ def get_captions():
         "This music is a captivating blend of haunting melodies and ambient sounds. It begins with a slow, deliberate tempo, creating a sense of mystery and intrigue. A string instrument plays a haunting melody, while subtle ambient sounds add depth and texture to the soundscape. The music gradually builds in intensity, with the string instrument becoming more prominent and the ambient sounds becoming more layered. The overall mood is dark and evocative, with a hint of melancholy."
     ]
 
-ef main():
-    captions = get_captions()  # Define this function to retrieve descriptions of music segments
+def main():
+    captions = get_captions()  
     music_summary = ""
     previous_summary = ""
     previous_end_frame = ""
