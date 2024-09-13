@@ -135,3 +135,30 @@ def get_similarity(image_path, audio_path):
     """
     similarity = main(image_path, audio_path)
     return similarity
+
+def get_clip_score_txt_img(image, text,model):
+    model, preprocess = clip.load('ViT-B/32')
+    model.eval()
+    image_input = preprocess(image).unsqueeze(0)
+
+    text_input = clip.tokenize([text])
+
+    # Move the inputs to GPU if available
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    image_input = image_input.to(device)
+    text_input = text_input.to(device)
+    model = model.to(device)
+
+    # Generate embeddings for the image and text
+    with torch.no_grad():
+        image_features = model.encode_image(image_input)
+        text_features = model.encode_text(text_input)
+
+    # Normalize the features
+    image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+    text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+
+    # Calculate the cosine similarity to get the CLIP score
+    clip_score = torch.matmul(image_features, text_features.T).item()
+
+    return clip_score
