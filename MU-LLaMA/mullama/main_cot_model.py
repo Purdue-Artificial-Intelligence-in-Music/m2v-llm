@@ -13,6 +13,8 @@ import llama
 from util.misc import *
 import os
 
+import re
+
 from history_list import HistoryList
 
 FPS = 30
@@ -48,28 +50,38 @@ def interp_pipe(image1, image2, length, output_frame_rate = FPS):
         output_frames.append(image1)
     return output_frames
 
-def summarize_convo(history_list, use_llama, mullama_model, llama_model, llama_tokenizer):
-    total_prompt = "Please summarize the following conversation:\n"
+def summarize_convo(history_list):
+    total_prompt = "Please summarize/repeat the following conversation, which will be provided in quotes \"\". Please write your summary after the text and enclose it in quotes \"\" as well. Please do not say anything after the summary. Make sure the summary is in English even if the conversation is not. You can write up to a few sentences. The conversation starts now. "
     for history in history_list:
-        total_prompt += "We asked: " + history[0] + "\n"
+        total_prompt += "We asked: \"" + history[0] + "\" "
         if history[1] is not None:
-            total_prompt += "You replied: " + history[1] + "\n"
+            total_prompt += "You replied: \"" + history[1] + "\" "
+
+    total_prompt += "Your summary is: \""
 
     print("Summarize call   -----------------")
-    print(total_prompt)
+    # print(total_prompt)
 
-    total_prompt = "How are you today?"
+    total_prompt = total_prompt.replace("\n", "")
+
+    global llama_model
+    global llama_tokenizer
     
-    if use_llama:
-        input_ids = llama_tokenizer.encode(total_prompt, return_tensors="pt")
-        input_ids = input_ids.to('cuda')
-        output = llama_model.generate(input_ids, max_length=1024, num_beams=4, no_repeat_ngram_size=2)
-        response = llama_tokenizer.decode(output[0], skip_special_tokens=True)
-        out = response[0].strip()
-    else:
-        out = mullama_model.generate_no_audio([total_prompt])[0].strip()
+    if llama_model is None or llama_tokenizer is None:
+        llama_model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto", use_auth_token=token)
+        llama_model.cuda()
+        llama_tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=token)
+        llama_tokenizer.use_default_system_prompt = False
+    input_ids = llama_tokenizer.encode(total_prompt, return_tensors="pt")
+    input_ids = input_ids.to('cuda')
+    output = llama_model.generate(input_ids, max_length=2048, num_beams=4, no_repeat_ngram_size=2)
+    response = llama_tokenizer.decode(output[0], skip_special_tokens=True)
 
-    print("Result: ", out)
+    # print("Llama response: ", response)
+    out = response
+    out = out.split("Your summary is: \"")[1]
+    out = out.split("\"")[0]
+    print("Summarized:", out)
     print("End summarize call   -----------------")
 
     return out
@@ -88,15 +100,11 @@ def multimodal_generate(
         output_video = True,
         use_llama = True,
 ):
+    global llama_model
+    global llama_tokenizer
     
-    if use_llama:
-        llama_model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto", use_auth_token=token)
-        llama_model.cuda()
-        llama_tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=token)
-        llama_tokenizer.use_default_system_prompt = False
-    else:
-        llama_model = None
-        llama_tokenizer = None
+    llama_model = None
+    llama_tokenizer = None
 
     # Load audio
     if audio_path is None:
@@ -147,7 +155,7 @@ def multimodal_generate(
         history_list = []
 
         long_term_prompt = "This is the first chunk of music.\n" if len(h_list.get_list()) == 0 \
-                            else "Here is what we said about the previous chunks of music:\n" + summarize_convo(lh_list.get_list(), use_llama, mullama_model, llama_model, llama_tokenizer)
+                            else "Here is what we said about the previous chunks of music:\n" + summarize_convo(lh_list.get_list())
         
         with torch.cuda.amp.autocast():
             audio_query = mullama_model.forward_audio(inputs, cache_size, cache_t, cache_weight)
@@ -158,10 +166,10 @@ def multimodal_generate(
             if h_list.get_length() == 0:
                 total_prompt += "Nothing has been said yet about the current chunk of music.\n"
             else:
-                total_prompt += summarize_convo(h_list.get_list(), use_llama, mullama_model, llama_model, llama_tokenizer)
+                total_prompt += summarize_convo(h_list.get_list())
             total_prompt += "Now, please answer the following question: " + prompt
 
-            total_prompt = "Describe the current chunk of music."
+            total_prompt = "What is the emotion of the music?"
 
             print("-------- Total prompt:")
             print(total_prompt)
@@ -179,11 +187,16 @@ def multimodal_generate(
             if type(result) == list:
                 result = result[0]
 
+            re.sub(r'[^A-Za-z0-9.,!?;:\'\"()\[\]{}<>/@#&%*\-+=_\s]', '', result)
+
             print(f"Result: {result}")
 
-            h_list.append(prompt, result)
+            h_list.append("(prompt)", result.replace("\n", ""))
 
-        lh_list.append(f"About the number %d chunk of music, we said: " % (i), summarize_convo(h_list.get_list(), use_llama, mullama_model, llama_model, llama_tokenizer))
+        if i == 1:
+            lh_list.append(f"About the first chunk of music, we said: ", str(h_list.get_list()[0]))
+        else:
+            lh_list.append(f"About the number %d chunk of music, we said: " % (i), summarize_convo(h_list.get_list()))
         
         video_prompts.append(h_list.get_current()[1])
 
@@ -195,11 +208,21 @@ def multimodal_generate(
 
 
     del mullama_model
+    if llama_model is not None:
+        del llama_model
+    if llama_tokenizer is not None:
+        del llama_tokenizer
+
+    print("video_prompts:", video_prompts)
 
     with open("output_video_prompts.txt", 'w') as f:
+        f.write("test\n")
+        f.flush()
+        print(len(video_prompts))
         for prompt in video_prompts:
             f.write(prompt)
             f.write("\n")
+            f.flush()
 
     sd_model_id = "CompVis/stable-diffusion-v1-4"
     pipe = StableDiffusionPipeline.from_pretrained(sd_model_id)

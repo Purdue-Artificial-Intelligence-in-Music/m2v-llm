@@ -31,13 +31,19 @@ def chat_with_llama(prompt):
 
 print(f"Time taken to load model: %.3f seconds" % (time.time() - t))
 
+print("Welcome to the summarizer!")
+
 while True:
-    prompt = input("You: ")
+    prompt = input("The text to summarize: ")
     if prompt == "exit":
         break
 
     t = time.time()
+    prompt = "Please summarize the following conversation, which will be provided in quotes "". Please write your summary after the text and enclose it in quotes "" as well. Please do not say anything after the summary. The text is: \"" + prompt + "\". Your summary is: \""
     response = chat_with_llama(prompt)
-    print("Llama:", response)
+    print("Llama response: ", response)
+    response = response.split("Your summary is: \"")[1]
+    response = response.split("\"")[0]
+    print("Summarized:", response)
 
     print(f"Time taken to generate this sequence: %.3f seconds" % (time.time() - t))
