@@ -89,7 +89,7 @@ for idx, scene in enumerate(scenes):
     frames.extend(output.frames[0])
     seed += 1 # slowly increment seed, observe the effect
 
-export_to_video(frames, "animation14.mp4")
+export_to_video(frames, "video generation/liamCode/AnimateDiff/animation15.mp4")
 
 # I think 2^(batch size) = num frames. If this isn't met, then the code breaks.
 
