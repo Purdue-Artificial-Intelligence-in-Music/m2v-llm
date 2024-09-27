@@ -1,0 +1,590 @@
+[
+  {
+    "video_id": "lQEmvGLVnmk",
+    "video_path": "group_25/lQEmvGLVnmk.mp4",
+    "video_duration": 29.033333333333335,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 30.0,
+    "clip_id": "lQEmvGLVnmk_0000000",
+    "clip_path": "video_dataset_25/lQEmvGLVnmk_0000000.mp4",
+    "clip_duration": 5.966666666666667,
+    "clip_start_end_idx": [
+      0,
+      179
+    ],
+    "imaging_quality": 50.29741923014323,
+    "of_score": 2.948106,
+    "aesthetic_score": [
+      4.847118377685547,
+      5.252230644226074,
+      5.210811138153076
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "two people sitting in a room with boxes in front of them . ",
+      "a man and a woman sitting on the floor in front of boxes . ",
+      "two women sitting on the floor in front of boxes . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a rock song that consists of a flat male vocal singing over groovy bass, punchy snare, shimmering cymbals and electric guitar melody. It sounds energetic and the recording is noisy and in mono.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " pink background",
+      " doors",
+      "People",
+      " conversation",
+      " lockers"
+    ],
+    "background": "Storage",
+    "ocr_score": 0.016729728349673203,
+    "caption": "The video appears to be a compilation of clips featuring a woman in various situations, possibly showcasing her life or experiences, with a focus on her interactions with others and her surroundings.",
+    "polish_caption": "A woman navigates various situations and interactions, showcasing her life and experiences, set against a backdrop of diverse surroundings."
+  },
+  {
+    "video_id": "yeJl_u22lrg",
+    "video_path": "group_52/yeJl_u22lrg.mp4",
+    "video_duration": 25.04,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 25.0,
+    "clip_id": "yeJl_u22lrg_0000000",
+    "clip_path": "video_dataset_52/yeJl_u22lrg_0000000.mp4",
+    "clip_duration": 16.12,
+    "clip_start_end_idx": [
+      0,
+      403
+    ],
+    "imaging_quality": 64.5941670735677,
+    "of_score": 6.621188,
+    "aesthetic_score": [
+      4.7151689529418945,
+      4.997020721435547,
+      5.133369445800781
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a close up of a person with short blonde hair . ",
+      "a close - up of a woman 's face in a black and white photo . ",
+      "a close - up of a woman 's face in a dimly - lit room . "
+    ],
+    "music_caption": [
+      {
+        "text": "This is a documentary on the theremin. There is a female voice that is speaking in a narrative manner about the extent of the woodwind. A piano is playing a melody in the background. The atmosphere is calming and a little bit like the sound of a cello.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      "Woman",
+      " face",
+      " eyes",
+      " lips",
+      " nose"
+    ],
+    "background": "Dark",
+    "ocr_score": 0.0197084547610104,
+    "caption": "The video appears to be a creative or artistic piece featuring a person with a neutral expression, possibly a woman, with a focus on her face and eyes. The image is split into four panels, each showing a different angle or perspective of the same person. The person's expression remains consistent across all panels, and there is a text overlay in the bottom right corner of the image that reads \"reality is mingling.\" The overall tone of the video is mysterious and intriguing, with a dark background that contrasts with the person's face. The use of multiple panels and the text overlay suggests that the video may be conveying a message or idea related to the concept of reality and its relationship with the person depicted.",
+    "polish_caption": "A person with a neutral expression, possibly a woman, is depicted in four different angles or perspectives, with a consistent expression and a dark background, conveying a message or idea related to the concept of reality and its relationship with the person."
+  },
+  {
+    "video_id": "hV5iKUr3mio",
+    "video_path": "group_76/hV5iKUr3mio.mp4",
+    "video_duration": 20.0,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 25.0,
+    "clip_id": "hV5iKUr3mio_0000005",
+    "clip_path": "video_dataset_76/hV5iKUr3mio_0000005.mp4",
+    "clip_duration": 8.28,
+    "clip_start_end_idx": [
+      293,
+      500
+    ],
+    "imaging_quality": 52.32220713297526,
+    "of_score": 4.330538,
+    "aesthetic_score": [
+      4.93865966796875,
+      4.640081405639648,
+      4.468457221984863
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a group of children and adults playing a christmas song . ",
+      "a group of people sitting in a room with lights . ",
+      "a group of children sitting on the ground with christmas lights . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a pop song that consists of a passionate female vocal singing over wide electric guitar chords, groovy bass, punchy snare, shimmering hi hats, soft kick hits and snare hits. It sounds addictive, passionate and energetic.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " children",
+      " presents",
+      "Christmas",
+      " family",
+      " tree"
+    ],
+    "background": "Christmas",
+    "ocr_score": 0.09585595703125001,
+    "caption": "The video is a collage of various scenes featuring people, including children, gathered around a Christmas tree, with a focus on a family celebrating Christmas.",
+    "polish_caption": "A heartwarming Christmas celebration filled with joy, love, and laughter as a family and their friends gather around a beautifully decorated tree, exchanging gifts and sharing special moments."
+  },
+  {
+    "video_id": "rZKnz8J5It4",
+    "video_path": "group_50/rZKnz8J5It4.mp4",
+    "video_duration": 28.041666666666668,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 24.0,
+    "clip_id": "rZKnz8J5It4_0000002",
+    "clip_path": "video_dataset_50/rZKnz8J5It4_0000002.mp4",
+    "clip_duration": 5.333333333333333,
+    "clip_start_end_idx": [
+      256,
+      384
+    ],
+    "imaging_quality": 53.880027770996094,
+    "of_score": 33.272957,
+    "aesthetic_score": [
+      4.665126323699951,
+      4.711719036102295,
+      4.310842514038086
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a car made out of blocks of red and black plastic . ",
+      "a red toy car in motion on a tiled floor . ",
+      "a red sports car driving down a street past tall buildings . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a drum cover of a rock song and it consists of a wooden percussion, after which there is a flat male vocal talking. The recording is noisy and in mono.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " sparkles",
+      " brick road",
+      "Red car",
+      " motion",
+      " nighttime"
+    ],
+    "background": "Sparks",
+    "ocr_score": 0.0031249999999999997,
+    "caption": "The video shows a red sports car driving on a dark road, with the car's lights on, and the background is dark with some sparkling effects, possibly indicating a nighttime setting.",
+    "polish_caption": "A sleek red sports car speeds through a dark and sparkling nighttime landscape, its lights illuminating the road ahead."
+  },
+  {
+    "video_id": "Y3FZqlpyIt4",
+    "video_path": "group_71/Y3FZqlpyIt4.mp4",
+    "video_duration": 28.458333333333332,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 24.0,
+    "clip_id": "Y3FZqlpyIt4_0000004",
+    "clip_path": "video_dataset_71/Y3FZqlpyIt4_0000004.mp4",
+    "clip_duration": 5.416666666666667,
+    "clip_start_end_idx": [
+      447,
+      577
+    ],
+    "imaging_quality": 62.43176778157552,
+    "of_score": 2.370867,
+    "aesthetic_score": [
+      5.452263832092285,
+      5.31742000579834,
+      5.4102678298950195
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a man and a woman in a room with flowers . ",
+      "a man and a woman in a room with flowers . ",
+      "a man and a woman in a room with flowers . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a flat male vocal talking over punchy kick and snare hits, shimmering hi hats and groovy piano chords. It sounds like a tutorial and the recording is in mono and noisy.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " man",
+      " reflection",
+      "Woman",
+      " room",
+      " mirror"
+    ],
+    "background": "Bedroom",
+    "ocr_score": 0.0003405448717948718,
+    "caption": "The video appears to be a romantic or intimate scene featuring a man and a woman in a bedroom setting, with the man and woman looking at each other and the woman possibly being in a state of undress or disarray.",
+    "polish_caption": "A man and woman engage in an intimate moment in a bedroom setting, with the woman possibly in a state of undress or disarray, as they gaze longingly at each other."
+  },
+  {
+    "video_id": "V7aoQNR0LJg",
+    "video_path": "group_69/V7aoQNR0LJg.mp4",
+    "video_duration": 27.1,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 30.0,
+    "clip_id": "V7aoQNR0LJg_0000002",
+    "clip_path": "video_dataset_69/V7aoQNR0LJg_0000002.mp4",
+    "clip_duration": 5.333333333333333,
+    "clip_start_end_idx": [
+      456,
+      616
+    ],
+    "imaging_quality": 51.73127110799154,
+    "of_score": 32.228668,
+    "aesthetic_score": [
+      5.019690990447998,
+      4.955000400543213,
+      4.749324321746826
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "there is an image of people in a kitchen . ",
+      "an additional 3 5 , 0 0 0 canadians can access support . ",
+      "an image of a man in a blue shirt with a large amount of text in front of him . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a live performance of a rock song and it consists of electric guitar melody played over punchy kick and snare hits, shimmering hi hats, groovy bass guitar and electric guitar chord progression. There are some crowd cheering noises in the background. It sounds emotional and passionate.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " support",
+      " crowd",
+      "People",
+      " numbers",
+      " statistics"
+    ],
+    "background": "Crowd",
+    "ocr_score": 0.3060381401909722,
+    "caption": "The video appears to be an advertisement or informational piece about Canadian immigration policies, highlighting the number of immigrants and the types of support available to them.",
+    "polish_caption": "Canadian immigration policies are highlighted in this informative piece, showcasing the number of immigrants and the various forms of support available to them."
+  },
+  {
+    "video_id": "JZTQj7z2hYU",
+    "video_path": "group_63/JZTQj7z2hYU.mp4",
+    "video_duration": 13.133333333333333,
+    "video_resolution": [
+      720,
+      404
+    ],
+    "video_fps": 30.0,
+    "clip_id": "JZTQj7z2hYU_0000003",
+    "clip_path": "video_dataset_63/JZTQj7z2hYU_0000003.mp4",
+    "clip_duration": 8.866666666666667,
+    "clip_start_end_idx": [
+      90,
+      356
+    ],
+    "imaging_quality": 64.54600270589192,
+    "of_score": 7.497664,
+    "aesthetic_score": [
+      4.28635311126709,
+      4.974090576171875,
+      5.172623157501221
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a woman helping a man put a tie on . ",
+      "a man and a woman standing next to each other . ",
+      "a man and a woman standing next to each other in front of a wall . "
+    ],
+    "music_caption": [
+      {
+        "text": "This music is instrumental. The tempo is medium fast with boomy bass, synthesiser arrangements and electronic music. The music is muffled as the audio quality is inferior but the beats are punchy, buoyant, bouncy, youthful, groovy and energetic. This music is a Electro Hip-Hop.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " leather jackets",
+      " smiles",
+      " red background",
+      " casual attire",
+      "People"
+    ],
+    "background": "Red",
+    "ocr_score": 0.023010149572649574,
+    "caption": "The video captures a man and a woman posing together in a red-toned setting, with the man wearing a red jacket and the woman in a black top, and they are smiling and looking at the camera.",
+    "polish_caption": "A man and woman pose together in a red-toned setting, the man wearing a red jacket and the woman in a black top, both smiling and looking directly at the camera."
+  },
+  {
+    "video_id": "vEWBM6p2oio",
+    "video_path": "group_51/vEWBM6p2oio.mp4",
+    "video_duration": 27.96,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 25.0,
+    "clip_id": "vEWBM6p2oio_0000001",
+    "clip_path": "video_dataset_51/vEWBM6p2oio_0000001.mp4",
+    "clip_duration": 13.36,
+    "clip_start_end_idx": [
+      20,
+      354
+    ],
+    "imaging_quality": 68.9646987915039,
+    "of_score": 7.870923,
+    "aesthetic_score": [
+      4.572579383850098,
+      4.383851528167725,
+      4.605301380157471
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a man in a suit and tie in front of a wooden wall . ",
+      "a close up of a person wearing a suit and tie . ",
+      "a close up of a person wearing a suit and tie . "
+    ],
+    "music_caption": [
+      {
+        "text": "This is the recording of a tutorial. There is a male voice speaking in an instructive manner on the technique of embouchure.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      "Man",
+      " wall",
+      " tie",
+      " suit",
+      " expression"
+    ],
+    "background": "Wall",
+    "ocr_score": 0.0,
+    "caption": "The video appears to show a man in a suit and tie, captured in various keyframes, possibly illustrating a transformation or progression of emotions or expressions.",
+    "polish_caption": "A man in a suit and tie undergoes a transformation, showcasing a range of emotions and expressions, from a stoic demeanor to a joyful grin."
+  },
+  {
+    "video_id": "fAK0Mbvu53I",
+    "video_path": "group_74/fAK0Mbvu53I.mp4",
+    "video_duration": 20.0,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 25.0,
+    "clip_id": "fAK0Mbvu53I_0000000",
+    "clip_path": "video_dataset_74/fAK0Mbvu53I_0000000.mp4",
+    "clip_duration": 11.4,
+    "clip_start_end_idx": [
+      0,
+      285
+    ],
+    "imaging_quality": 64.18996302286784,
+    "of_score": 10.175962,
+    "aesthetic_score": [
+      5.506937026977539,
+      5.621164321899414,
+      4.852190971374512
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "an illustration of a boy with brown hair and wearing a red shirt . ",
+      "a drawing of a young boy with brown hair and wearing a red and white striped shirt . ",
+      "a cartoon of a black and white bird with long hair . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a flat male vocal talking over arpeggiated acoustic guitar melody and simple bass. It sounds like a tutorial and the recording is noisy and in mono.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " eyes",
+      " striped shirt",
+      "Boy",
+      " spider",
+      " hair"
+    ],
+    "background": "Blurred",
+    "ocr_score": 0.021421867249503967,
+    "caption": "The video features a cartoon character with blonde hair and a red and white striped shirt, who appears to be in a state of surprise or shock, with exaggerated facial expressions and body language, possibly reacting to a sudden event or discovery.",
+    "polish_caption": "A cartoon character with blonde hair and a red and white striped shirt reacts with exaggerated surprise and shock to a sudden event or discovery, displaying a range of emotions through their facial expressions and body language."
+  },
+  {
+    "video_id": "Rm5jX08QuUM",
+    "video_path": "group_67/Rm5jX08QuUM.mp4",
+    "video_duration": 27.666666666666668,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 24.0,
+    "clip_id": "Rm5jX08QuUM_0000006",
+    "clip_path": "video_dataset_67/Rm5jX08QuUM_0000006.mp4",
+    "clip_duration": 5.5,
+    "clip_start_end_idx": [
+      354,
+      486
+    ],
+    "imaging_quality": 52.435794830322266,
+    "of_score": 0.745909,
+    "aesthetic_score": [
+      5.12635612487793,
+      4.734588146209717,
+      4.775810241699219
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a man and a woman sitting at a wooden table . ",
+      "a man and a woman sitting at a wooden table . ",
+      "a man and a woman sitting at a dining table . "
+    ],
+    "music_caption": [
+      {
+        "text": "This is an amateur recording of a flamenco music piece. There is a female vocalist singing in a foreign language. The main tune is being played by the acoustic guitar and the electric guitar while there is a bass guitar playing in the background. The rhythm is provided by a simple acoustic drum beat. The atmosphere is lively. This piece could be used in the soundtrack of a teenage drama TV series as the opening theme.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      "People",
+      " table",
+      " conversation",
+      " bench",
+      " restaurant"
+    ],
+    "background": "Restaurant",
+    "ocr_score": 0.00733531984508547,
+    "caption": "The video appears to be a montage of a man and a woman sitting at a table, engaging in conversation, with the man seemingly trying to persuade or convince the woman of something. The setting suggests a casual, indoor environment, possibly a restaurant or a cafe. The man's facial expressions and body language indicate that he is making an effort to communicate his point of view, while the woman's reactions are more neutral, suggesting she is listening attentively. The overall tone of the video is serious, and the content seems to revolve around a discussion or negotiation between the two individuals.",
+    "polish_caption": "A man sits across from a woman in a casual indoor setting, engaged in a serious conversation as he tries to persuade her of something, while her neutral reactions suggest she is listening attentively."
+  },
+  {
+    "video_id": "oFEZhvaPXkc",
+    "video_path": "group_26/oFEZhvaPXkc.mp4",
+    "video_duration": 28.962266666666668,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 29.97002997002997,
+    "clip_id": "oFEZhvaPXkc_0000017",
+    "clip_path": "video_dataset_26/oFEZhvaPXkc_0000017.mp4",
+    "clip_duration": 5.3053,
+    "clip_start_end_idx": [
+      709,
+      868
+    ],
+    "imaging_quality": 60.93530782063802,
+    "of_score": 17.368465,
+    "aesthetic_score": [
+      4.931849956512451,
+      5.2286481857299805,
+      5.281131744384766
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a man standing on a train track near a gate . ",
+      "a man standing in front of an entrance to a shrine . ",
+      "two people are walking down the street in front of a shrine . "
+    ],
+    "music_caption": [
+      {
+        "text": "The low quality recording features a flat male vocal talking, after which there is a backing track playing. It sounds like a tutorial. The recording is noisy and in mono.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      " station",
+      " train tracks",
+      " trees",
+      " handbag",
+      "Woman"
+    ],
+    "background": "Train station",
+    "ocr_score": 0.0013456162944457187,
+    "caption": "The video captures a woman walking along a train track, carrying a pink bag, with a focus on her journey through a scenic, wooded area.",
+    "polish_caption": "A woman carrying a pink bag embarks on a scenic journey through a wooded area, capturing the beauty of nature along the way."
+  },
+  {
+    "video_id": "H7h_xSZc1C0",
+    "video_path": "group_62/H7h_xSZc1C0.mp4",
+    "video_duration": 15.0,
+    "video_resolution": [
+      720,
+      1280
+    ],
+    "video_fps": 25.0,
+    "clip_id": "H7h_xSZc1C0_0000000",
+    "clip_path": "video_dataset_62/H7h_xSZc1C0_0000000.mp4",
+    "clip_duration": 8.92,
+    "clip_start_end_idx": [
+      0,
+      223
+    ],
+    "imaging_quality": 76.56435902913411,
+    "of_score": 3.946826,
+    "aesthetic_score": [
+      5.115231513977051,
+      5.157038688659668,
+      5.016729831695557
+    ],
+    "view_scale": "",
+    "movement": "",
+    "speed": "",
+    "frame_caption": [
+      "a woman in a pink hat is holding a cell phone . ",
+      "a woman in a pink hat and a pink bra is laying on a white shell . ",
+      "a woman in a pink hat is laying on a white shell . "
+    ],
+    "music_caption": [
+      {
+        "text": "This is a tutorial on how to speak in a foreign language. There is a male voice speaking in an instructive manner about the extent of difference how to achieve the stab sound. The instruments are not heard clearly heard due to the low quality of the audio.",
+        "time": "0:00-10:00"
+      }
+    ],
+    "objects": [
+      "Woman",
+      " shell",
+      " hat",
+      " pool",
+      " dog"
+    ],
+    "background": "Swimming pool",
+    "ocr_score": 0.00737881747159091,
+    "caption": "The video features a woman in a pink bikini and hat, lounging on a white inflatable shell, with a dog, and the scene is set in a pool with a backdrop of a building and trees.",
+    "polish_caption": "A woman lounges on a white inflatable shell in a pool, surrounded by a picturesque backdrop of a building and trees, wearing a pink bikini and hat, and accompanied by a playful dog."
+  }
+]
