@@ -1,31 +1,32 @@
-"""
-This file tests the "CogVideoX-5B" model, a promising text-video model.
-
-TODO download the model weights manually at: https://huggingface.co/THUDM/CogVideo/tree/main
-"""
-
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import numpy as np
+from diffusers import CogVideoXPipeline
+from diffusers.utils import export_to_video
 
-# Load the tokenizer and the model
-tokenizer = AutoTokenizer.from_pretrained("THUDM/CogVideo")
-model = AutoModelForCausalLM.from_pretrained("THUDM/CogVideo").to('cuda' if torch.cuda.is_available() else 'cpu')
+# Define your prompt for video generation
+prompt = "A panda playing guitar in a serene bamboo forest."
 
-# Set your prompt here
-text_prompt = "A dog running in a park on a sunny day."
+# Load the model with optimizations
+pipe = CogVideoXPipeline.from_pretrained(
+    "THUDM/CogVideoX-5b",  # Use CogVideoX-5B model
+    torch_dtype=torch.float32  # FP16 to reduce VRAM usage
+    # revision="fp16"  # Ensuring we're using the FP16 version for optimized VRAM usage
+)
 
-# Tokenize the prompt
-inputs = tokenizer(text_prompt, return_tensors="pt").to('cuda' if torch.cuda.is_available() else 'cpu')
+# Enable optimizations for low VRAM usage
+pipe.enable_model_cpu_offload()  # Offload some of the model to the CPU to save VRAM
+pipe.vae.enable_tiling()  # Reduces memory load by processing images in tiles
+pipe.enable_sequential_cpu_offload()  # Further offloads model layers to CPU when not in use
 
-# Generate the video
-with torch.no_grad():
-    video_output = model.generate(**inputs, max_length=50)  # Adjust max_length as needed
+# Set up the generation with a limited number of inference steps to reduce computation time
+video_frames = pipe(
+    prompt=prompt,
+    num_videos_per_prompt=1,
+    num_inference_steps=40,  # Adjust the number of steps for faster inference (lower quality trade-off)
+    num_frames=48  # Number of frames for a ~6 second video at 8 FPS
+).frames
 
-# Decode the output (typically, the output will need postprocessing)
-decoded_output = tokenizer.decode(video_output[0], skip_special_tokens=True)
+video_frames = [np.array(frame) for frame in video_frames]
 
-# Save the output
-with open('video generation/liamCode/CogVideo/cog1.mp4', 'wb') as f:
-    f.write(decoded_output)
-
-print("Video generation completed and saved as 'as cog1.mp4'.")
+# Save the generated frames to an MP4 video file
+export_to_video(video_frames, "output/optimized_generated_video.mp4")
