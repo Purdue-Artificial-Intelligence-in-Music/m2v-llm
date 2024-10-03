@@ -24,7 +24,6 @@ FPS = 30
 SR = 24000
 
 model_id = "meta-llama/Llama-2-7b-hf"
-token = "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"
 
 # Args
 parser = argparse.ArgumentParser()
@@ -40,7 +39,7 @@ parser.add_argument(
     "--seconds_used_per_iter", default=15, type=float, help="Number of seconds of audio per generated video keyframe",
 )
 parser.add_argument(
-    "--seconds_jump_per_iter", default=10, type=float, help="Number of seconds of audio per generated video keyframe",
+    "--seconds_jump_per_iter", default=5, type=float, help="Number of seconds of audio per generated video keyframe",
 )
 parser.add_argument(
     "--inference_steps", default=50, type=int, help="Number of steps for Stable Diffusion",
@@ -63,12 +62,17 @@ def llama_inference(prompt,
                     ):
     global llama_model
     global llama_tokenizer
+    global token
     
     if llama_model is None or llama_tokenizer is None:
         llama_model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto", use_auth_token=token)
         llama_model.cuda()
         llama_tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=token)
         llama_tokenizer.use_default_system_prompt = False
+    if len(prompt) > 4096:
+        print("Warning: input prompt for LLaMA inference is longer than 4096 tokens, truncating")
+        print("The prompt is: ", prompt)
+        prompt = prompt[:4096]
     input_ids = llama_tokenizer.encode(prompt, return_tensors="pt")
     input_ids = input_ids.to('cuda')
     output = llama_model.generate(input_ids, max_length=max_length, num_beams=4, no_repeat_ngram_size=2)
@@ -79,7 +83,9 @@ def llama_inference(prompt,
 
 def summarize_convo(history_list,
                     summarize_preamble = "Summarize the following conversation. The conversation starts now. ",
-                    explicit_labels = False):
+                    explicit_labels = False,
+                    debug_print = True,
+                    ):
     # Formatting prompt - make sure to let LLaMA think at the end
     total_prompt = summarize_preamble
     for history in history_list:
@@ -93,15 +99,17 @@ def summarize_convo(history_list,
                 total_prompt += "\"" + history[1] + "\" "
 
     total_prompt += "Your summary is: \""
-
-    print("Summarize call   -----------------")
     total_prompt = total_prompt.replace("\n", "")
+
+    if debug_print:
+        print("Summarize call   -----------------")
 
     out = llama_inference(total_prompt)
     out = out.split("Your summary is: \"")[1]
     out = out.split("\"")[0]
-    print("Summarized:", out)
-    print("End summarize call   -----------------")
+    if debug_print:
+        print("Summarized:", out)
+        print("End summarize call   -----------------")
 
     return out
 
@@ -122,6 +130,7 @@ def analyze_audio_batched(
         music_summarize_call=summarize_convo,
         overwrite_existing_prompts = True,
         truncate_music = False,
+        debug_print = False,
 ):
     if audio_weight == 0:
         raise Exception('Please set the weight')
@@ -151,7 +160,7 @@ def analyze_audio_batched(
             output_prefix = audio_path.split("/")[-1].split(".")[0]
 
             # Load and transform audio
-            audio, sr = torchaudio.load(audio_path)
+            audio, sr = torchaudio.load(input_dir + audio_path)
             if sr != SR:
                 waveform = torchaudio.functional.resample(audio, orig_freq=sr, new_freq=SR)
                 sr = SR
@@ -161,11 +170,12 @@ def analyze_audio_batched(
             SAMPLES_USED = int(max(seconds_used_per_iter * sr, 1))
             waveform = torch.mean(waveform, np.argmin([len(waveform), len(waveform[0])])) if len(waveform.shape) > 1 else waveform
             if truncate_music:
-                waveform = waveform[:SAMPLES_USED+3*SAMPLES_JUMP+10]
+                waveform = waveform[:min(len(waveform), SAMPLES_USED+3*SAMPLES_JUMP+10)]
             waveform = torch.reshape(waveform, (1, -1))
             AUDIO_LEN = waveform.shape[1]
             audio = waveform
-            print("Audio shape: ", audio.shape())
+            if debug_print:
+                print(f"Audio shape: {audio.shape}")
 
             # Main loop
             curr_sample = 0
@@ -185,7 +195,8 @@ def analyze_audio_batched(
                 if end_sample > AUDIO_LEN:
                     end_sample = AUDIO_LEN
                     break_at_end = True
-                print(f"-----------------\nProcessing chunk {i} from sample {curr_sample} to {end_sample}")
+                if debug_print:
+                    print(f"-----------------\nProcessing chunk {i} from sample {curr_sample} to {end_sample}")
                 inputs = {}
                 inputs['Audio'] = [audio[:, curr_sample : end_sample], audio_weight]  # Audio is [samples, weight]
 
@@ -199,9 +210,11 @@ def analyze_audio_batched(
                 for prompt in prompt_list:
                     total_prompt = preamble + " "
                     total_prompt += prompt
+                    # total_prompt = total_prompt.replace("\n", "")
 
-                    print("-------- Prompt:")
-                    print(total_prompt)
+                    if debug_print:
+                        print("-------- Prompt:")
+                        print(total_prompt)
 
                     prompts = [total_prompt]
 
@@ -216,15 +229,16 @@ def analyze_audio_batched(
 
                     re.sub(r'[^A-Za-z0-9.,!?;:\'\"()\[\]{}<>/@#&%*\-+=_\s]', '', result)
 
-                    print(f"Result: {result}")
+                    if ":" in result:
+                        result = result.split(":")[1]
+
+                    if debug_print:
+                        print(f"Result: {result}")
 
                     h_list.append("(prompt)", result.replace("\n", ""))
 
                 # Write the important bits to lh_list in a few sentences
-                if i == 1:
-                    lh_list.append(f"Music chunk #1", str(h_list.get_list()[0]))
-                else:
-                    lh_list.append(f"Music chunk #%d" % (i), summarize_convo(h_list.get_list(), summarize_preamble))
+                lh_list.append(f"Music chunk #%d" % (i), music_summarize_call(h_list.get_list(), summarize_preamble, debug_print))
                 
                 curr_sample += SAMPLES_JUMP
                 i += 1
@@ -235,8 +249,7 @@ def analyze_audio_batched(
 
             # Write to file
             with open(output_dir + output_prefix + ".txt", 'w') as f:
-                if not truncate_music:
-                    assert len(video_prompts) == math.ceil(float(AUDIO_LEN) / SAMPLES_JUMP)
+                print(f"{len(video_prompts)} prompts generated for {AUDIO_LEN} samples")
                 for prompt in video_prompts:
                     f.write(prompt)
                     f.write("\n")
@@ -291,7 +304,17 @@ def generate_video(
             
             output_images = []
 
+            prev_prompt = ""
             for prompt in video_prompts:
+                if prompt == "":
+                    if prev_prompt != "":
+                        print("Warning: empty prompt detected, using previous prompt")
+                        prompt = prev_prompt
+                    else:
+                        print("Warning: empty prompt detected, no previous prompt available")
+                        prompt = ""
+                else:
+                    prev_prompt = prompt
                 output_images.append(pipe(prompt, num_inference_steps=inference_steps, guidance_scale=guidance_scale).images[0])
 
             output_video_frames = []
@@ -311,22 +334,32 @@ def generate_video(
 
 
 if __name__ == "__main__":
+    global token
+    with open('hf_token.txt', 'r') as f:
+        token = f.readlines()[0]
     preamble = ""
     prompt_list = []
     with open('preamble.txt', 'r') as f:
         preamble = f.read()
+        preamble = preamble.replace("\n", " ")
     with open('prompt_list.txt', 'r') as f:
         prompt_list = f.readlines()
     with open('summarize.txt', 'r') as f:
         summarize_preamble = f.read()
+        summarize_preamble = summarize_preamble.replace("\n", " ")
     if not args.input_dir.endswith("/"):
         args.input_dir += "/"
     if not args.output_dir.endswith("/"):
         args.output_dir += "/"
-    print("Audio path: ", args.audio_path)
+    print("Audio path: ", args.input_dir)
     print("Output dir: ", args.output_dir)
-    # print("Text file: ", args.output_dir + args.output_prefix + ".txt")
-    # print("Video file: ", args.output_dir + args.output_prefix + ".mp4")
+    print("Preamble: ", preamble)
+    print("Summarize preamble: ", summarize_preamble)
+    print("Prompt list: ", prompt_list)
+
+    for file in os.listdir(args.output_dir):
+        if file.endswith(".txt") or file.endswith(".mp4"):
+            os.remove(args.output_dir + file)
     
     analyze_audio_batched(input_dir=args.input_dir, 
                           output_dir=args.output_dir, 
@@ -339,16 +372,17 @@ if __name__ == "__main__":
                           cache_size=100, 
                           cache_t=20, 
                           cache_weight=0.0, 
-                          max_gen_len=2048, 
+                          max_gen_len=512, 
                           gen_t=0.6, 
                           top_p=0.8,
-                          overwrite_existing_prompts=True,
-                          truncate_music=True,
+                          overwrite_existing_prompts=False,
+                          truncate_music=False,
+                          debug_print=True,
                           )
     generate_video(input_dir=args.output_dir, 
                    output_dir=args.output_dir,
                    seconds_jump_per_iter=args.seconds_jump_per_iter,
                    inference_steps=args.inference_steps,
                    guidance_scale=args.guidance_scale,
-                   overwrite_existing_videos=True,
+                   overwrite_existing_videos=False,
                    )

@@ -1,0 +1,2 @@
+Think step by step. Based on the input of a 10-second clip of the current music, use a short paragraph to describe how you should design a picture to achieve synesthesia with music.
+Based on the current frame you describe, make a suggestion for the design of the next frame in order to ensure that the next frame is coherent with the current frame and that the story as a whole fits the overall and theme of the music.
