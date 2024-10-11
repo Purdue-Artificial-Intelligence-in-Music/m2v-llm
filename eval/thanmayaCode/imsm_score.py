@@ -1,3 +1,9 @@
+VIDEO_PATH = "/content/sample.mp4"
+INTERVAL = 1  # 1 second
+AUDIO_LENGTH = 2  # 5 seconds
+OUTPUT_DIR = "./output"
+
+
 import pandas as pd
 import torch
 import os
@@ -6,6 +12,7 @@ import librosa
 from transformers import CLIPProcessor, CLIPModel
 from transformers import AutoProcessor, AutoModel
 from PIL import Image
+
 
 
 # Load CLIP model
@@ -55,11 +62,70 @@ audio_piano = "Yiruma - River Flows in You.mp3"
 text_piano = "a soft, flowing piano composition with a gentle, romantic feel. The melody is simple yet deeply emotive, creating a tranquil and introspective atmosphere."
 image_piano = "piano.jpg"
 
+from moviepy.editor import VideoFileClip
 
+
+def process_imsm_melfusion(image_files, text_list, audio_files):
+    for i in range(0, len(image_files) - 1, 2):
+        image1, image2 = image_files[i], image_files[i+1]
+        text1, text2 = text_list[i], text_list[i+1]
+        audio1, audio2 = audio_files[i], audio_files[i+1]
+        
+        compute_imsm(image1, image2, text1, text2, audio1, audio2)
+
+
+def extract_frame_audio_and_text1(video_path, interval, audio_length, output_dir):
+    video = VideoFileClip(video_path)
+
+    video_duration = video.duration
+
+    image_files = []
+    audio_files = []
+    hello_array = []
+
+    # Loop through the video at intervals to extract frames and corresponding audio
+    current_time = 0
+    count = 0
+    while current_time < video_duration:
+        # Extract the frame at the current time
+        frame = video.get_frame(current_time)
+
+        # Save the frame as an image
+        frame_path = f"{output_dir}/frame_{count}.png"
+        with open(frame_path, "wb") as f:
+            img = Image.fromarray(frame)
+            img.save(f)
+        image_files.append(frame_path)
+
+        # Extract the corresponding audio segment of audio_length duration
+        audio_start = current_time
+        audio_end = min(current_time + audio_length, video_duration)
+        audio = video.audio.subclip(audio_start, audio_end)
+
+        # Save the audio as a file
+        audio_path = f"{output_dir}/audio_{count}.mp3"
+        audio.write_audiofile(audio_path)
+        audio_files.append(audio_path)
+
+        # Append "hello" to the text array
+        hello_array.append("hello")
+
+        # Update time and count
+        current_time += interval
+        count += 1
+
+    print("Extraction complete.")
+    return image_files, hello_array, audio_files
 
 ### testing out melfusion code on the data that is specified above to see the difference (and hope for more reasonable scores)
 
 compute_imsm(image_piano, image_river, text_piano, text_river, audio_piano, audio_river)
+
+# Testing codes for video imsm score
+# image_files, text_array, audio_files = extract_frame_audio_and_text1(VIDEO_PATH, INTERVAL, AUDIO_LENGTH, OUTPUT_DIR)
+# process_imsm_melfusion(image_files, text_array, audio_files)
+
+
 
 
 
