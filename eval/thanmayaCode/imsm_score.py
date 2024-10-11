@@ -47,3 +47,19 @@ def compute_imsm(image1, image2, text1, text2, audio1, audio2):
     imsm_score = probs_metric.softmax(dim=-1)
 
     print("IMSM Score:", imsm_score)
+
+text_river = "soothing ambience of flowing water and a forest creek, making it ideal for relaxation, focus, meditation, or sleep."
+image_river = "river.png"
+audio_river = "20 Minutes of Relaxing River Sounds - Flowing Water and Forest Creek Ambience 🏞️.mp3"
+audio_piano = "Yiruma - River Flows in You.mp3"
+text_piano = "a soft, flowing piano composition with a gentle, romantic feel. The melody is simple yet deeply emotive, creating a tranquil and introspective atmosphere."
+image_piano = "piano.jpg"
+
+
+
+### testing out melfusion code on the data that is specified above to see the difference (and hope for more reasonable scores)
+
+compute_imsm(image_piano, image_river, text_piano, text_river, audio_piano, audio_river)
+
+
+
