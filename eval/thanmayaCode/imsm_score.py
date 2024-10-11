@@ -17,7 +17,7 @@ clap_model = AutoModel.from_pretrained("laion/clap-htsat-fused")
 clap_processor = AutoProcessor.from_pretrained("laion/clap-htsat-fused")
 
 
-def compute_imsm_melfusion(image1, image2, text1, text2, audio1, audio2):
+def compute_imsm(image1, image2, text1, text2, audio1, audio2):
     # Load images
     image_list = [Image.open(image1), Image.open(image2)]
 
