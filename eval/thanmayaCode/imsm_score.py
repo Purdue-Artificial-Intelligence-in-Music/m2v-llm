@@ -17,33 +17,33 @@ clap_model = AutoModel.from_pretrained("laion/clap-htsat-fused")
 clap_processor = AutoProcessor.from_pretrained("laion/clap-htsat-fused")
 
 
-def compute_imsm(audio, text, image):
-    image = Image.open(image)
+def compute_imsm_melfusion(image1, image2, text1, text2, audio1, audio2):
+    # Load images
+    image_list = [Image.open(image1), Image.open(image2)]
 
-    # CLIP embeddings (Image and Text)
-    inputs = clip_processor(text=text, images=image, return_tensors="pt", padding=True, truncation=True, max_length=77)
-    clip_outputs = clip_model(**inputs)
-    image_embeds = clip_outputs.image_embeds
-    text_embeds_clip = clip_outputs.text_embeds
+    input_text = [text1, text2]
+    # Process text and image inputs with CLIP processor
+    inputs = clip_processor(text=input_text, images=image_list, return_tensors="pt", padding=True)
 
-    audio, sr1 = librosa.load(audio, sr=None)
+    outputs = clip_model(**inputs)
+    logits_per_image = outputs.logits_per_image  # this is the image-text similarity score
+    probs_clip = logits_per_image.softmax(dim=1)  # we can take the softmax to get the label probabilities
 
-    # CLAP embeddings (Audio and Text)
-    inputs_audio = clap_processor(audios=audio, text=text, return_tensors="pt", padding=True, max_length = 77, sampling_rate = 48000)
-    clap_outputs = clap_model(**inputs_audio)
-    audio_embeds = clap_outputs.audio_embeds
-    text_embeds_clap = clap_outputs.text_embeds
+    # Load audio files
+    y1, sr1 = librosa.load(audio1, sr=None)
+    y2, sr2 = librosa.load(audio2, sr=None)
 
-    # Compute cosine similarities between embeddings
-    cos_sim_clip = torch.nn.functional.cosine_similarity(image_embeds, text_embeds_clip)
-    cos_sim_clap = torch.nn.functional.cosine_similarity(audio_embeds, text_embeds_clap)
+    audio_sample = [y1, y2]
 
-    # IMSM Metric Calculation
-    imsm_score = torch.matmul(cos_sim_clip, cos_sim_clap.T)
-    print(f"IMSM Score: {imsm_score.item()}")
+    # Process text and audio inputs with CLAP processor
+    inputs = clap_processor(text=input_text, audios=audio_sample, return_tensors="pt", padding=True)
 
-    # CLIP Metric Calculation
-    print(f"CLIP Score: {cos_sim_clip.item()}")
+    outputs = clap_model(**inputs)
+    logits_per_audio = outputs.logits_per_audio  # this is the audio-text similarity score
+    probs_clap = logits_per_audio.softmax(dim=-1)  # we can take the softmax to get the label probabilities
 
-    # CLAP Metric Calculation
-    print(f"CLAP Score: {cos_sim_clap.item()}")
+    # Calculate IMSM score
+    probs_metric = probs_clip @ probs_clap.T
+    imsm_score = probs_metric.softmax(dim=-1)
+
+    print("IMSM Score:", imsm_score)
