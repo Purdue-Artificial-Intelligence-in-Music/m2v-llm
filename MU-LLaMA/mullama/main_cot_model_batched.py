@@ -138,6 +138,8 @@ def summarize_convo(history_list,
         print("Returning history_list[0][1] as a placeholder")
         out = history_list[0][1]  
 
+    out = out[:min(len(out), 500)]
+
     if debug_print:
         print("Summarized:\x1B[3m", out, "\x1B[0m")
         # print("End summarize call   -----------------")
@@ -284,21 +286,25 @@ def analyze_audio_batched(
                 music_info = music_summarize_call(h_list.get_list(), summarize_preamble, debug_print, combine_all=True)
 
                 # Do fun things and create synesthesia
-                metachory = llama_inference(metachory + "\"" + music_info + "\" Your idea is: \"", max_length=2048)
+                metachory = llama_inference(metachory + "\"" + music_info + "\" Your idea is: \"", max_length=2500)
                 metachory = metachory.split("Your idea is: \"")[1]
                 metachory = metachory.split("\"")[0]
                 if debug_print:
                     print("Metachory:\x1B[3m", metachory, "\x1B[0m")
+                metachory = metachory[:min(len(metachory), 500)]
+
 
                 # Summarize into Stable Diffusion format
                 full_info = metachory + " " + music_info
-                sd_prompt = llama_inference(sd_summary + "\"" + full_info + "\" Your prompt is: \"", max_length=1536)
+                sd_prompt = llama_inference(sd_summary + "\"" + full_info + "\" Your prompt is: \"", max_length=2500)
                 sd_prompt = sd_prompt.split("Your prompt is: \"")[1]
                 sd_prompt = sd_prompt.split("\"")[0]
+                sd_prompt = sd_prompt[:100]
                 if re.sub(r'[^A-Za-z0-9]', '', sd_prompt) == "":
                     print("Warning: LLaMA returned an empty Stable Diffusion prompt, returning full_info as a placeholder")
                     sd_prompt = full_info
-                elif debug_print:
+                sd_prompt = sd_prompt[:min(len(sd_prompt), 500)]
+                if debug_print:
                     print("SD Prompt:\x1B[3m", sd_prompt, "\x1B[0m")
 
                 lh_list.append(f"Music chunk #%d" % (i), (full_info, sd_prompt))
@@ -371,7 +377,7 @@ def generate_video_basic(
         if prompt_path.endswith("_prompts.txt"):
             print("Processing file: ", prompt_path)
             output_prefix = prompt_path.split("/")[-1].split("_prompts.")[0]
-            with open(output_dir + output_prefix + ".txt", 'r') as f:
+            with open(output_dir + output_prefix + "_prompts.txt", 'r') as f:
                 video_prompts = f.readlines()
                 try:
                     assert len(video_prompts) > 0
