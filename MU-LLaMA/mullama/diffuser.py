@@ -18,6 +18,7 @@ class Diffuser(threading.Thread):
                  overwrite_existing_frames = True,
                  debug_print=False):
         threading.Thread.__init__(self)
+        self.stop_request = False
         self.device = device
         self.name = "Diffuser"
         # self.stop_request = False
@@ -43,7 +44,7 @@ class Diffuser(threading.Thread):
 
     def is_valid_write_path(self, path):
         if os.path.exists(path):
-            if not self.overwrite_existing_files:
+            if not self.overwrite_existing_frames:
                 if self.debug_print:
                     print("Output file already exists, skipping")
                 return False

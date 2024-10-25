@@ -26,6 +26,7 @@ class MusicAnalyzer(threading.Thread):
                  truncate_music=False, 
                  debug_print=False):
         threading.Thread.__init__(self)
+        self.stop_request = False
         self.device = device
         self.name = "Music Analyzer"
 
@@ -142,6 +143,7 @@ class MusicAnalyzer(threading.Thread):
         i = 1
 
         if os.path.isfile(os.path.join(self.output_path, f"{output_name}_ma_chunk_{i}.hlst")):
+            self.outputs.append((self.output_path, output_name, i))
             return
 
         try:

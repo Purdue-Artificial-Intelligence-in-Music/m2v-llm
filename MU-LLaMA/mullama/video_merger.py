@@ -9,16 +9,19 @@ from moviepy.editor import VideoFileClip, AudioFileClip
 
 class Video_Frame_Merger(threading.Thread):
     def __init__(self,
+                 audio_dir="./input_files",
                  output_dir="./output_videos",
                  seconds_jump_per_iter = 5,
                  overwrite_existing_files = True,
                  FPS=30,
                  debug_print=False):
         threading.Thread.__init__(self)
+        self.stop_request = False
         self.name = "Video Frame Merger"
         # self.stop_request = False
         self.sleep_delay = 1.0
         self.debug_print = debug_print
+        self.audio_dir = audio_dir
         self.output_dir = output_dir
 
         self.overwrite_existing_files = overwrite_existing_files
@@ -61,7 +64,7 @@ class Video_Frame_Merger(threading.Thread):
             interp_frames = self.dummy_interp_pipe(keyframes[j], keyframes[j + 1], self.seconds_jump_per_iter)
             frames.extend(interp_frames)
 
-        interp_frames = self.dummy_interp_pipe(keyframes[j], keyframes[j], self.seconds_jump_per_iter)
+        interp_frames = self.dummy_interp_pipe(keyframes[len(keyframes) - 1], keyframes[len(keyframes) - 1], self.seconds_jump_per_iter)
         frames.extend(interp_frames)
 
         return frames
@@ -76,6 +79,7 @@ class Video_Frame_Merger(threading.Thread):
         video.release()
     
     def merge_audio_video(self, video_path, audio_path):
+        print(video_path, audio_path)
         video = VideoFileClip(video_path)
         audio = AudioFileClip(audio_path)
 
@@ -85,7 +89,7 @@ class Video_Frame_Merger(threading.Thread):
         # Save the final video
         return video_with_audio
 
-    def process_file(self, prompts_folder, prompts_name, audio_path):
+    def process_file(self, prompts_folder, prompts_name, chunk):
         i = 1
         keyframes = []
         while True:
@@ -94,7 +98,11 @@ class Video_Frame_Merger(threading.Thread):
                 break
             keyframes.append(Image.open(frame_path))
             i += 1
-        
+
+        audio_path = os.path.join(self.audio_dir, prompts_folder.split("/")[-1], f"{prompts_name}.wav")
+        if not os.path.isfile(audio_path):
+            print(f"Audio file {audio_path} not found, skipping")
+            return
         out_path = os.path.join(self.output_dir, f"{prompts_name}_temp.mp4")
         if not self.is_valid_write_path(out_path):
             return

@@ -17,6 +17,7 @@ class StoryThinker(threading.Thread):
                  device="cuda" if torch.cuda.is_available() else "cpu",
                  debug_print=False):
         threading.Thread.__init__(self)
+        self.stop_request = False
         self.device = device
         self.name = "Story Thinker"
         # self.stop_request = False
@@ -58,8 +59,8 @@ class StoryThinker(threading.Thread):
             print("The prompt is: ", prompt)
             prompt = prompt[:max_length]
         input_ids = self.llama_tokenizer.encode(prompt, return_tensors="pt")
-        input_ids = input_ids.to('cuda')
-        output = self.llama_model.generate(input_ids, max_length=max_length, num_beams=4, no_repeat_ngram_size=2)
+        input_ids = input_ids.to(self.llama_model.device)
+        output = self.llama_model.generate(input_ids, max_length=max_length, num_beams=4, no_repeat_ngram_size=2, temperature=1)
         response = self.llama_tokenizer.decode(output[0], skip_special_tokens=True)
 
         response = re.sub(r'[^A-Za-z0-9.,!?;:()\'\"\[\]{}<>/@#&%*\-+=_\s]', '', response)
@@ -110,9 +111,6 @@ class StoryThinker(threading.Thread):
 
         out = out[:min(len(out), 500)]
 
-        if debug_print:
-            print("Summarized:\x1B[3m", out, "\x1B[0m")
-
         return out
     
     def ecphory_call(self, music_info):
@@ -121,6 +119,7 @@ class StoryThinker(threading.Thread):
         ecphory = ecphory.split("\"")[0]
         if self.debug_print:
             print("Metachory:\x1B[3m", ecphory, "\x1B[0m")
+        return ecphory
     
     def sd_summarize_call(self, ecphory, music_info):
         full_info = ecphory + " " + music_info
@@ -134,6 +133,7 @@ class StoryThinker(threading.Thread):
         sd_prompt = sd_prompt[:min(len(sd_prompt), 500)]
         if self.debug_print:
             print("SD Prompt:\x1B[3m", sd_prompt, "\x1B[0m")
+        return sd_prompt
 
     def process_file(self, prompts_folder, prompts_name, chunk):
         h_list = HistoryList()
@@ -154,6 +154,7 @@ class StoryThinker(threading.Thread):
         
         except Exception as e:
             print("LLaMA failed to process the prompt, recovering what we can")
+            print("Exception:", e)
             if not music_info:
                 music_info = "No music information available"
             if not ecphory:
