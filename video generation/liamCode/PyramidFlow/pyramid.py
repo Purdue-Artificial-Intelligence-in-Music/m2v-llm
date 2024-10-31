@@ -7,7 +7,6 @@ model_path = 'model'   # The local directory to save downloaded checkpoint
 snapshot_download("rain1011/pyramid-flow-sd3", local_dir=model_path, local_dir_use_symlinks=False, repo_type='model')
 
 # LOGIN
-# login("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")
 
 pipe = DiffusionPipeline.from_pretrained("rain1011/pyramid-flow-sd3")
 
