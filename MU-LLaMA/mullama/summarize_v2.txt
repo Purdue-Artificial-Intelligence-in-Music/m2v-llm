@@ -1,0 +1,7 @@
+The following is a conversation about a piece of music, provided in quotes "". 
+Please write a summary of the music and conversation, in quotes "" as well. 
+Do not say anything after the summary. 
+The summary should be translated to English. 
+Do not use the words "conversation", "said", "talked about", or similar words. 
+Write up to a few sentences. Use detail.
+The conversation starts now. 

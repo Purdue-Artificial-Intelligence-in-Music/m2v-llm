@@ -1,7 +1,11 @@
+import pickle
+
 class HistoryList:
-    def __init__(self):
+    def __init__(self, name="", description=""):
         self.history = []
         self.history_index = 0
+        self.name = name
+        self.description = description
     
     def append(self, prompt, result):
         self.history.append([prompt, result])
@@ -32,3 +36,12 @@ class HistoryList:
                 f.write("\nMU-LLaMA's answer:\n")
                 f.write(value[1])
                 f.write("\n\n")
+
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self.history, f)
+    
+    def load(self, filename):
+        with open(filename, 'rb') as f:
+            self.history = pickle.load(f)
+            self.history_index = len(self.history) - 1

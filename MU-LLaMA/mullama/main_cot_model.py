@@ -21,13 +21,19 @@ FPS = 30
 SR = 24000
 
 model_id = "meta-llama/Llama-2-7b-hf"
-token = "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"
 
 # Args
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--audio_path", default="./audio.wav", type=str,
     help="Path to audio you want to render a video for",
+)
+parser.add_argument(
+    "--output_dir", default="./", type=str,
+    help="Path to audio you want to render a video for",
+)
+parser.add_argument(
+    "--output_prefix", default="output", type=str,
 )
 parser.add_argument(
     "--seconds_used_per_iter", default=5, type=float, help="Number of seconds of audio per generated video keyframe",
@@ -51,6 +57,7 @@ def interp_pipe(image1, image2, length, output_frame_rate = FPS):
     return output_frames
 
 def summarize_convo(history_list):
+    global token
     total_prompt = "Please summarize/repeat the following conversation, which will be provided in quotes \"\". Please write your summary after the text and enclose it in quotes \"\" as well. Please do not say anything after the summary. Make sure the summary is in English even if the conversation is not. You can write up to a few sentences. The conversation starts now. "
     for history in history_list:
         total_prompt += "We asked: \"" + history[0] + "\" "
@@ -215,14 +222,11 @@ def multimodal_generate(
 
     print("video_prompts:", video_prompts)
 
-    with open("output_video_prompts.txt", 'w') as f:
-        f.write("test\n")
-        f.flush()
+    with open(args.output_dir + args.output_prefix + ".mp4", 'w') as f:
         print(len(video_prompts))
         for prompt in video_prompts:
             f.write(prompt)
             f.write("\n")
-            f.flush()
 
     sd_model_id = "CompVis/stable-diffusion-v1-4"
     pipe = StableDiffusionPipeline.from_pretrained(sd_model_id)
@@ -238,7 +242,7 @@ def multimodal_generate(
     if output_video:
         videodims = output_video_frames[0].size
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")    
-        video = cv2.VideoWriter("test.mp4", fourcc, FPS, videodims)
+        video = cv2.VideoWriter(args.output_dir + args.output_prefix + ".mp4", fourcc, FPS, videodims)
         for frame in output_video_frames:
             imtemp = frame.copy()
             video.write(cv2.cvtColor(np.array(imtemp), cv2.COLOR_RGB2BGR))
@@ -247,11 +251,18 @@ def multimodal_generate(
     return output_images
 
 if __name__ == "__main__":
+    global token
+    with open('hf_token.txt', 'r') as f:
+        token = f.readlines()[0]
     preamble = ""
     prompt_list = []
     with open('preamble.txt', 'r') as f:
         preamble = f.read()
         #print(f"Preamble:\n{preamble}")
+    # print("Audio path: ", args.audio_path)
+    # print("Output dir: ", args.output_dir)
+    # print("Text file: ", args.output_dir + args.output_prefix + ".txt")
+    # print("Video file: ", args.output_dir + args.output_prefix + ".mp4")
     with open('prompt_list.txt', 'r') as f:
         prompt_list = f.readlines()
         #print(f"Prompt list:\n{prompt_list}")
@@ -261,4 +272,4 @@ if __name__ == "__main__":
     #     _ = multimodal_generate(args.audio_path, 1.0, preamble, prompt_list, 10, 20, 0.1, 1024, 0.25, 1.0)
     # except Exception as e:
     #     print(f"Error: {e}")
-    h_list.write()
+    # h_list.write()
