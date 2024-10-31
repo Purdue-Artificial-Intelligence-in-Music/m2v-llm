@@ -1,0 +1,9 @@
+
+torch @ https://download.pytorch.org/whl/cu124/torch-<version>-cu124-cp<python_version>-cp<python_version>-linux_x86_64.whl
+torchvision @ https://download.pytorch.org/whl/cu124/torchvision-<version>-cu124-cp<python_version>-cp<python_version>-linux_x86_64.whl
+torchaudio @ https://download.pytorch.org/whl/cu124/torchaudio-<version>-cu124-cp<python_version>-cp<python_version>-linux_x86_64.whl
+diffusers[torch]
+transformers
+accelerate
+pillow
+scipy
